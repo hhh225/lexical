@@ -121,53 +121,69 @@ public class LexicalAnalysis {
                 case "inse":
                     if (content[correntLo]=='='){
                         state="done";
+                        currentToken="lessequal";
                     }
                     else{
                         state="done";
+                        currentToken="less";
                         correntLo--;
                     }
                     break;
                 case "inle":
                     if (content[correntLo]=='='){
                         state="done";
+                        currentToken="morequal";
                     }
                     else{
                         state="done";
+                        currentToken="more";
                         correntLo--;
                     }
                     break;
                 case "ine":
                     if (content[correntLo]=='='){
                         state="done";
-
+                        currentToken="equal";
                     }
                     else {
                         state="done";
+                        currentToken="assign";
                         correntLo--;
                     }
                     break;
                 case "innote":
                     if (content[correntLo]=='='){
                         state="done";
+                        currentToken="unequal";
                     }
                     else {
                         state="done";
+                        currentToken="error";
                         correntLo--;
                     }
                     break;
             }
             if (save){
                 tokenString+=content[correntLo];
-
             }
             if (state=="done"){
-                tokenString+='\0';
+                if (currentToken=="id"){
+                    currentToken=findPreserve(tokenString);
+                }
             }
-            correntLo++;
+            correntLo++;    //往后读一个位置
         }
-
         return currentToken;
     }
+
+    public String findPreserve(String str){
+        String[] preserve={"else","if","int","return","void","while"};
+        for(String s:preserve){
+            if (s.equals(str))return s;
+        }
+        return "id";
+    }
+
     public static void main(String[] args) throws IOException {
         Scanner s=new Scanner(System.in);
         String str=s.nextLine();
