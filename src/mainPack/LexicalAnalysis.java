@@ -38,7 +38,18 @@ public class LexicalAnalysis {
                     else if (Character.isAlphabetic(content[correntLo])){
                         state="inid";
                     }
-                    else if ()
+                    else if (content[correntLo]=='<'){
+                        state="inse";
+                    }
+                    else if(content[correntLo]=='>'){
+                        state="inle";
+                    }
+                    else if (content[correntLo]=='='){
+                        state="ine";
+                    }
+                    else if (content[correntLo]=='!'){
+                        state="innote";
+                    }
                     break;
             }
             break;
