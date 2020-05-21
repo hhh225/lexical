@@ -10,6 +10,8 @@ public class LexicalAnalysis {
     InputStreamReader inputStreamReader;
     StringBuffer stringBuffer;
     char[] content;
+    Boolean save=true;
+    String tokenString;
 
     public LexicalAnalysis(String rute) throws IOException { //构造函数读文件
         file=new File(rute);
@@ -29,7 +31,7 @@ public class LexicalAnalysis {
     public String stateTransform(){
         int correntLo=0;
         String currentToken=null;
-        while(true){
+        while(!state.equals("done")){
             switch (state){
                 case "start":
                     if (Character.isDigit(content[correntLo])){
@@ -50,11 +52,54 @@ public class LexicalAnalysis {
                     else if (content[correntLo]=='!'){
                         state="innote";
                     }
-                    else if (content[correntLo]=='')
+                    else if (content[correntLo]==' '||content[correntLo]=='\t'||content[correntLo]=='\n'){
+                        save=false;
+                    }
+                    else if (content[correntLo]=='/'){
+                        state="slash";
+                    }
                     break;
+                case "slash":
+                    if (content[correntLo]=='*'){
+                        state="comment";
+                        save=false;
+                    }
+                    else{
+                        state="done";
+                        correntLo--;
+                    }
+                    break;
+                case "comment":
+                    if (content[correntLo]=='*'){
+                        state="outcomment";
+                    }
+                    break;
+                case "outcomment":
+                    if (content[correntLo]=='/'){
+                        state="start";
+                    }
+                    else {
+                        state="comment";
+                    }
+                    break;
+                case "inse":
+                    if (content[correntLo]=='='){
+                        state="done";
+                    }
+                    else{
+                        state="done";
+                        correntLo--;
+                    }
             }
-            break;
+            if (save){
+                tokenString+=content[correntLo];
+            }
+            if (state=="done"){
+                tokenString+='\0';
+            }
+            correntLo++;
         }
+
         return currentToken;
     }
     public static void main(String[] args) throws IOException {
