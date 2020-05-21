@@ -11,7 +11,7 @@ public class LexicalAnalysis {
     StringBuffer stringBuffer;
     char[] content;
     Boolean save=true;
-    String tokenString;
+    String tokenString="";
 
     public LexicalAnalysis(String rute) throws IOException { //构造函数读文件
         file=new File(rute);
@@ -34,6 +34,7 @@ public class LexicalAnalysis {
         while(!state.equals("done")){
             switch (state){
                 case "start":
+                    save=true;
                     if (Character.isDigit(content[correntLo])){
                         state="innum";
                     }
@@ -162,14 +163,38 @@ public class LexicalAnalysis {
                         correntLo--;
                     }
                     break;
+                case "innum":
+                    if (!Character.isDigit(content[correntLo])){
+                        state="done";
+                        currentToken="num";
+                        correntLo--;
+                    }
+                    break;
+                case "inid":
+                    if (!Character.isAlphabetic(content[correntLo])){
+                        state="done";
+                        currentToken="id";
+                        correntLo--;
+                    }
+                    break;
+                case "done":
+                    break;
+                default:
+                    state="done";
+                    currentToken="error";
             }
             if (save){
                 tokenString+=content[correntLo];
+            }
+            else {
+                tokenString="";
             }
             if (state=="done"){
                 if (currentToken=="id"){
                     currentToken=findPreserve(tokenString);
                 }
+                System.out.println(currentToken);
+                System.out.println(tokenString);
             }
             correntLo++;    //往后读一个位置
         }
@@ -188,6 +213,7 @@ public class LexicalAnalysis {
         Scanner s=new Scanner(System.in);
         String str=s.nextLine();
         LexicalAnalysis lexicalAnalysis=new LexicalAnalysis(str);
+        lexicalAnalysis.stateTransform();
     }
 }
 
