@@ -50,6 +50,7 @@ public class LexicalAnalysis {
                     else if (content[correntLo]=='!'){
                         state="innote";
                     }
+                    else if (content[correntLo]=='')
                     break;
             }
             break;
