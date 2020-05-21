@@ -58,14 +58,50 @@ public class LexicalAnalysis {
                     else if (content[correntLo]=='/'){
                         state="slash";
                     }
+                    else {
+                        state="done";
+                        switch (content[correntLo]){
+                            case '+':
+                                currentToken="plus";
+                                break;
+                            case '-':
+                                currentToken="minus";
+                                break;
+                            case '*':
+                                currentToken="times";
+                                break;
+                            case ';':
+                                currentToken="semi";
+                                break;
+                            case ',':
+                                currentToken="comma";
+                                break;
+                            case '(':
+                                currentToken="lparen";
+                                break;
+                            case ')':
+                                currentToken="rparen";
+                                break;
+                            case '{':
+                                currentToken="lblock";
+                                break;
+                            case '}':
+                                currentToken="rblock";
+                                break;
+                            default:
+                                currentToken="error";
+                                break;
+                        }
+                    }
                     break;
-                case "slash":
+                case "slash":      //
                     if (content[correntLo]=='*'){
                         state="comment";
                         save=false;
                     }
                     else{
                         state="done";
+                        currentToken="over";
                         correntLo--;
                     }
                     break;
@@ -90,9 +126,39 @@ public class LexicalAnalysis {
                         state="done";
                         correntLo--;
                     }
+                    break;
+                case "inle":
+                    if (content[correntLo]=='='){
+                        state="done";
+                    }
+                    else{
+                        state="done";
+                        correntLo--;
+                    }
+                    break;
+                case "ine":
+                    if (content[correntLo]=='='){
+                        state="done";
+
+                    }
+                    else {
+                        state="done";
+                        correntLo--;
+                    }
+                    break;
+                case "innote":
+                    if (content[correntLo]=='='){
+                        state="done";
+                    }
+                    else {
+                        state="done";
+                        correntLo--;
+                    }
+                    break;
             }
             if (save){
                 tokenString+=content[correntLo];
+
             }
             if (state=="done"){
                 tokenString+='\0';
