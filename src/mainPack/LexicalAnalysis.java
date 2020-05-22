@@ -60,7 +60,7 @@ public class LexicalAnalysis {
                     else if (content[correntLo]=='!'){
                         state="innote";
                     }
-                    else if (content[correntLo]==' '||content[correntLo]=='\t'||content[correntLo]=='\r'){
+                    else if (content[correntLo]==' '||content[correntLo]=='\t'||content[correntLo]=='\r'||content[correntLo]=='\n'){
                         save=false;
                     }
                     else if (content[correntLo]=='/'){
