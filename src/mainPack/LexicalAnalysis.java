@@ -1,6 +1,8 @@
 package mainPack;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class LexicalAnalysis {
@@ -12,6 +14,7 @@ public class LexicalAnalysis {
     char[] content;
     Boolean save=true;
     String tokenString="";
+    int correntLo=0;
 
     public LexicalAnalysis(String rute) throws IOException { //构造函数读文件
         file=new File(rute);
@@ -29,13 +32,17 @@ public class LexicalAnalysis {
     }
 
     public String stateTransform(){
-        int correntLo=0;
+        //int correntLo=0;
         String currentToken=null;
         while(!state.equals("done")){
+
             switch (state){
                 case "start":
                     save=true;
-                    if (Character.isDigit(content[correntLo])){
+                    if (correntLo==content.length){
+                        return "end";
+                    }
+                    if (Character.isDigit(content[correntLo])){         //数字
                         state="innum";
                     }
                     else if (Character.isAlphabetic(content[correntLo])){
@@ -53,7 +60,7 @@ public class LexicalAnalysis {
                     else if (content[correntLo]=='!'){
                         state="innote";
                     }
-                    else if (content[correntLo]==' '||content[correntLo]=='\t'||content[correntLo]=='\n'){
+                    else if (content[correntLo]==' '||content[correntLo]=='\t'||content[correntLo]=='\r'){
                         save=false;
                     }
                     else if (content[correntLo]=='/'){
@@ -98,10 +105,11 @@ public class LexicalAnalysis {
                 case "slash":      //
                     if (content[correntLo]=='*'){
                         state="comment";
-                        save=false;
+
                     }
                     else{
                         state="done";
+                        save=false;
                         currentToken="over";
                         correntLo--;
                     }
@@ -113,14 +121,21 @@ public class LexicalAnalysis {
                     break;
                 case "outcomment":
                     if (content[correntLo]=='/'){
-                        state="start";
+                        state="done";
+                        tokenString="";
+                        save=false;
                     }
                     else {
                         state="comment";
                     }
                     break;
                 case "inse":
-                    if (content[correntLo]=='='){
+                    if (correntLo==content.length){
+                        state="done";
+                        currentToken="less";
+                        save=false;
+                    }
+                    else if (content[correntLo]=='='){
                         state="done";
                         currentToken="lessequal";
                     }
@@ -131,7 +146,12 @@ public class LexicalAnalysis {
                     }
                     break;
                 case "inle":
-                    if (content[correntLo]=='='){
+                    if (correntLo==content.length){
+                        state="done";
+                        currentToken="more";
+                        save=false;
+                    }
+                    else if (content[correntLo]=='='){
                         state="done";
                         currentToken="morequal";
                     }
@@ -142,7 +162,12 @@ public class LexicalAnalysis {
                     }
                     break;
                 case "ine":
-                    if (content[correntLo]=='='){
+                    if (correntLo==content.length){
+                        state="done";
+                        currentToken="assign";
+                        save=false;
+                    }
+                    else if (content[correntLo]=='='){
                         state="done";
                         currentToken="equal";
                     }
@@ -153,7 +178,12 @@ public class LexicalAnalysis {
                     }
                     break;
                 case "innote":
-                    if (content[correntLo]=='='){
+                    if (correntLo==content.length){
+                        state="done";
+                        currentToken="error";
+                        save=false;
+                    }
+                    else if (content[correntLo]=='='){
                         state="done";
                         currentToken="unequal";
                     }
@@ -164,15 +194,31 @@ public class LexicalAnalysis {
                     }
                     break;
                 case "innum":
-                    if (!Character.isDigit(content[correntLo])){
+                    if (correntLo==content.length){
                         state="done";
+                        save=false;
                         currentToken="num";
-                        correntLo--;
+
+
+                    }
+                    else if (!Character.isDigit(content[correntLo])){    //如果识别到一个不是数字的
+                        state="done";
+                        save=false;
+                        currentToken="num";     //
+                        correntLo--;   //往后退一位
                     }
                     break;
                 case "inid":
-                    if (!Character.isAlphabetic(content[correntLo])){
+                    if (correntLo==content.length){
                         state="done";
+                        save=false;
+                        currentToken="id";
+
+
+                    }
+                    else if (!Character.isAlphabetic(content[correntLo])){
+                        state="done";
+                        save=false;
                         currentToken="id";
                         correntLo--;
                     }
@@ -183,37 +229,50 @@ public class LexicalAnalysis {
                     state="done";
                     currentToken="error";
             }
-            if (save){
+            if (save){         //保存，那么保存当前位
                 tokenString+=content[correntLo];
             }
-            else {
-                tokenString="";
-            }
+
             if (state=="done"){
                 if (currentToken=="id"){
                     currentToken=findPreserve(tokenString);
                 }
-                System.out.println(currentToken);
+
                 System.out.println(tokenString);
+                System.out.println(correntLo);
             }
             correntLo++;    //往后读一个位置
         }
+        state="start";
+        tokenString="";
         return currentToken;
     }
 
     public String findPreserve(String str){
         String[] preserve={"else","if","int","return","void","while"};
         for(String s:preserve){
-            if (s.equals(str))return s;
+            if (s.equals(str))return "reserveWord";
         }
         return "id";
+    }
+
+    public void process(){
+        List<String> symbolTable=new ArrayList<String>();
+        while (correntLo<content.length){
+            String lexicalUnit=stateTransform();
+            if(!lexicalUnit.equals("end"))symbolTable.add(lexicalUnit);
+        }
+        System.out.println("识别到的词法单元:");
+        for(String s:symbolTable){
+            System.out.println(s);
+        }
     }
 
     public static void main(String[] args) throws IOException {
         Scanner s=new Scanner(System.in);
         String str=s.nextLine();
         LexicalAnalysis lexicalAnalysis=new LexicalAnalysis(str);
-        lexicalAnalysis.stateTransform();
+        lexicalAnalysis.process();
     }
 }
 
